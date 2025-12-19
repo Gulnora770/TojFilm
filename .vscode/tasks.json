@@ -1,0 +1,83 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Django check",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"main.py",
+				"check"
+			],
+			"problemMatcher": [
+				"$python"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Django check",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"main.py",
+				"check"
+			],
+			"problemMatcher": [
+				"$python"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Run Django server",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"main.py",
+				"runserver"
+			],
+			"problemMatcher": [
+				"$python"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Run Django server (SQLite)",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"main.py",
+				"runserver"
+			],
+			"problemMatcher": [
+				"$python"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Apply Django migrations",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"main.py",
+				"migrate"
+			],
+			"problemMatcher": [
+				"$python"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Run Django server (final check)",
+			"type": "shell",
+			"command": "python",
+			"args": [
+				"main.py",
+				"runserver"
+			],
+			"problemMatcher": [
+				"$python"
+			],
+			"group": "build"
+		}
+	]
+}

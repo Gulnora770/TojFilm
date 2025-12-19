@@ -1,0 +1,247 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TojFilm</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/style.css' %}" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+   
+</head>
+
+<body class="text-white" style="background-color: #141414;">
+    <header class="p-5 flex justify-between items-center">
+        <img src="https://raw.githubusercontent.com/Gulnora770/TojFilm/1876c4f4ed04b8ea452b8ecd6b122a35a65a0784/tojFilmLogo.png" height="30" alt="TojFilm Logo" width="110">
+        
+        
+        <nav class="flex space-x-5">
+            <span><a href="/">Главная</a></span>
+            
+            <div class="dropdown">
+                <span id="dropdownMenuButton" class="cursor-pointer">Жанры ▼</span>
+                
+                <div id="dropdownMenu" class="dropdown-content hidden">
+                    <ul><a href="/genre/боевик/">Боевик</a></ul>
+                    <ul><a href="/genre/комедия/">Комедия</a></ul>
+                    <ul><a href="/genre/драма/">Драма</a></ul>
+                    <ul><a href="/genre/ужасы/">Ужасы</a></ul>
+                    <ul><a href="/genre/романтика/">Романтика</a></ul>
+                    <ul><a href="/genre/научная_фантастика/">Научная фантастика</a></ul>
+                    <ul><a href="/genre/фэнтези/">Фэнтези</a></ul>
+                </div>
+            </div>
+
+            <span><a href="/my-list">Мой список</a></span>
+        </nav>
+
+
+        <div class="flex space-x-5 items-center">
+            <form action="search" method="POST">
+                {% csrf_token %}
+                <input type="search" name="search_term" placeholder="Поиск" class="bg-gray-700 p-2 rounded">
+                <button class="bg-red-600 text-white p-2 rounded hover:bg-red-500">Поиск</button>
+            </form>
+            <div class="relative">
+                <a href="#" class="block p-2">Добро пожаловать, {{user.username}}</a>
+                <a href="/logout" class="block p-2">Выйти</a>
+            </div>
+        </div>
+    </header>
+    
+    <hr>
+
+    <section class="py-10 px-5">
+            <style>
+            .movie-img-hover {
+                transition: transform 0.3s cubic-bezier(.4,2,.6,1), box-shadow 0.3s, outline 0.3s;
+            }
+            .movie-img-hover:hover {
+                transform: scale(2);
+                outline: 3px solid #f87171;
+                z-index: 10;
+                box-shadow: 0 8px 32px 0 rgba(0,0,0,0.5);
+                position: relative;
+            }
+            .movie-btn {
+                transition: background 0.2s, color 0.2s, border 0.2s;
+            }
+            .movie-btn:hover {
+                filter: brightness(1.2);
+                border-width: 2px;
+                border-color: #f87171;
+            }
+            </style>
+    
+        <div align="center">
+            <h2 class="text-xl mb-5">
+                '{{movie_genre | title}}' Фильмы
+            </h2>
+        </div>
+        <div class="flex space-x-5 overflow-x-auto">
+        <div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-6">
+            {% for movie in movies %}
+            <div class="flex flex-col items-center bg-gray-900 rounded-lg p-2 shadow hover:shadow-lg transition-shadow">
+                <img 
+                    id="movie-img-{{ movie.uu_id }}"
+                    src="{{ movie.image_card.url }}"
+                    alt="{{ movie.title }} постер"
+                    class="w-28 h-40 object-cover rounded cursor-pointer movie-img-hover"
+                    onclick="showModal(this)"
+                    data-title="{{ movie.title }}"
+                    data-description="{{ movie.description }}"
+                    data-release-date="{{ movie.release_date|date:'Y' }}"
+                    data-genre="{{ movie.get_genre_display }}"
+                    data-length="{{ movie.length }}"
+                    data-image-card-url="{{ movie.image_card.url }}"
+                    data-image-cover-url="{{ movie.image_cover.url }}"
+                    data-video-url="/movie/{{ movie.uu_id }}"
+                >
+                <div class="text-center mt-2 font-semibold text-white text-xs truncate w-full">{{ movie.title }}</div>
+                <div class="text-gray-400 text-xs mt-1 w-full truncate">{{ movie.description|truncatechars:40 }}</div>
+                <div class="flex flex-col gap-1 mt-2 w-full">
+                    <button onclick="showModal(document.getElementById('movie-img-{{ movie.uu_id }}'))" class="bg-red-600 text-white text-xs py-1 rounded movie-btn">Подробнее</button>
+                    <a href="/movie/{{ movie.uu_id }}" class="w-full">
+                        <button class="bg-blue-600 text-white text-xs py-1 rounded w-full movie-btn">Воспроизвести</button>
+                    </a>
+                    <button id="addToListButton-{{ movie.uu_id }}"
+                        onclick="toggleFavorite('{{ movie.uu_id }}', this); event.stopPropagation();"
+                        class="text-xs py-1 rounded w-full movie-btn {% if movie.id in favorite_ids %}bg-green-600 text-white{% else %}border border-white text-white{% endif %}">
+                        {% if movie.id in favorite_ids %}Добавлено{% else %}Добавить в список{% endif %}
+                    </button>
+                </div>
+            </div>
+            {% endfor %}
+    </section>
+    
+   
+
+   
+    <div class="modal" id="movieModal">
+        <div class="modal-content">
+            <div class="flex justify-between">
+                <h2 class="text-xl mb-5">Название фильма</h2>
+                <button onclick="hideModal()">X</button>
+            </div>
+            <img id="modalMovieImage" width="1000" height="100" src="" alt="Movie Image" class=" mb-5">
+            <div class="flex justify-between mb-5">
+                <span id="modalMovieYear">Год: </span>
+                <span id="modalMovieGenre">Жанр: </span>
+                <span id="modalMovieLength">Длительность: </span>
+            </div>
+            <p id="modalMovieDescription" class="mb-5">Подробная информация о фильме.</p>
+            <div class="flex space-x-4 mb-5">
+                <a id="modalMoviePlayLink" href="#">
+                    <button class="bg-red-600 text-white p-2 px-5 rounded hover:bg-red-500">Воспроизвести</button>
+                </a>
+                <button id="addToListButton" onclick="addItemToList()" class="border border-white text-white p-2 px-5 rounded hover:bg-gray-700">
+                    Добавить в список
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentMovieUUID = null;
+        function showModal(element) {
+            // Retrieve data attributes
+            const title = element.getAttribute('data-title');
+            const description = element.getAttribute('data-description');
+            const releaseDate = element.getAttribute('data-release-date');
+            const genre = element.getAttribute('data-genre');
+            const length = element.getAttribute('data-length');
+            const imageCoverUrl = element.getAttribute('data-image-cover-url');
+            const dataVideoUrl = element.getAttribute('data-video-url');
+            // Extract UUID from video URL
+            const uuidMatch = dataVideoUrl.match(/movie\/(.+)$/);
+            currentMovieUUID = uuidMatch ? uuidMatch[1] : null;
+
+            // Update the modal's content with the movie details
+            document.querySelector('#movieModal .modal-content h2').textContent = title;
+            document.getElementById('modalMovieImage').src = imageCoverUrl;
+            document.getElementById('modalMovieImage').alt = title + " Обложка";
+            document.getElementById('modalMoviePlayLink').href = dataVideoUrl;
+            document.getElementById('modalMovieYear').textContent = "Год: " + releaseDate;
+            document.getElementById('modalMovieGenre').textContent = "Жанр: " + genre;
+            document.getElementById('modalMovieLength').textContent = "Длительность: " + length + "мин";
+            document.getElementById('modalMovieDescription').textContent = description;
+
+            // Reset add to list button in modal
+            const addBtn = document.getElementById('addToListButton');
+            addBtn.textContent = 'Добавить в список';
+            addBtn.disabled = false;
+
+            // Show the modal
+            const modal = document.getElementById('movieModal');
+            modal.style.display = 'block';
+            setTimeout(() => {
+                modal.classList.add('modal-show');
+            }, 50);
+        }
+
+        function toggleFavorite(uuid, btn) {
+            if (!uuid && currentMovieUUID) uuid = currentMovieUUID;
+            if (!uuid) {
+                alert('Ошибка: не удалось определить фильм.');
+                return;
+            }
+            const isAdded = btn.textContent.trim() === 'Удалить из списка';
+            const url = isAdded ? "{% url 'remove-from-list' %}" : "{% url 'add-to-list' %}";
+            $.ajax({
+                url: url,
+                type: "POST",
+                data: {
+                    movie_id: uuid,
+                    csrfmiddlewaretoken: "{{ csrf_token }}"
+                },
+                success: function(data) {
+                    if (btn) {
+                        if (isAdded) {
+                            btn.textContent = 'Добавить в список';
+                            btn.classList.remove('bg-green-600');
+                            btn.classList.add('border', 'border-white', 'text-white');
+                        } else {
+                            btn.textContent = 'Удалить из списка';
+                            btn.classList.remove('border', 'border-white');
+                            btn.classList.add('bg-green-600', 'text-white');
+                        }
+                    }
+                    // Also update modal button if open for same movie
+                    if (currentMovieUUID === uuid) {
+                        const modalBtn = document.getElementById('addToListButton');
+                        if (modalBtn) {
+                            if (isAdded) {
+                                modalBtn.textContent = 'Добавить в список';
+                                modalBtn.classList.remove('bg-green-600');
+                                modalBtn.classList.add('border', 'border-white', 'text-white');
+                            } else {
+                                modalBtn.textContent = 'Удалить из списка';
+                                modalBtn.classList.remove('border', 'border-white');
+                                modalBtn.classList.add('bg-green-600', 'text-white');
+                            }
+                        }
+                    }
+                },
+                error: function(xhr, errmsg, err) {
+                    console.error("Ошибка при изменении списка: " + errmsg);
+                }
+            });
+        }
+
+        function hideModal() {
+            const modal = document.getElementById('movieModal');
+            modal.classList.remove('modal-show');
+            setTimeout(() => {
+                modal.style.display = 'none';
+            }, 200);
+        }
+
+        window.onclick = function(event) {
+            if (event.target === document.getElementById('movieModal')) {
+                hideModal();
+            }
+        }
+    </script>

@@ -1,0 +1,176 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TojFilm</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="{% static 'assets/style.css' %}" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+</head>
+
+<body class="text-white" style="background-color:#141414;">
+
+<header class="p-5 flex justify-between items-center">
+    <img src="https://raw.githubusercontent.com/Gulnora770/TojFilm/1876c4f4ed04b8ea452b8ecd6b122a35a65a0784/tojFilmLogo.png"
+         width="110" height="30">
+
+    <nav class="flex space-x-5">
+        <a href="/">Главная</a>
+        <a href="/my-list">Мой список</a>
+    </nav>
+</header>
+
+<hr>
+
+<section class="py-10 px-5">
+<div class="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-6">
+
+{% for movie in movies reversed %}
+<div class="bg-gray-900 rounded-lg p-2 flex flex-col items-center">
+
+    <img id="movie-img-{{ movie.uu_id }}"
+         src="{{ movie.image_card.url }}"
+         class="w-28 h-40 object-cover rounded cursor-pointer"
+         onclick="showModal(this)"
+         data-title="{{ movie.title }}"
+         data-description="{{ movie.description }}"
+         data-release-date="{{ movie.release_date|date:'Y' }}"
+         data-genre="{{ movie.get_genre_display }}"
+         data-length="{{ movie.length }}"
+         data-image-cover-url="{{ movie.image_cover.url }}"
+         data-video-url="/movie/{{ movie.uu_id }}">
+
+    <div class="text-xs mt-2 truncate w-full text-center">{{ movie.title }}</div>
+
+    <!-- КНОПКИ -->
+    <div class="flex flex-col gap-1 w-full mt-2">
+
+        <!-- Подробнее -->
+        <button onclick="showModal(document.getElementById('movie-img-{{ movie.uu_id }}'))"
+                class="bg-red-600 text-xs py-1 rounded">
+            Подробнее
+        </button>
+
+        <!-- Воспроизвести -->
+        <a href="/movie/{{ movie.uu_id }}">
+            <button class="bg-blue-600 text-xs py-1 rounded w-full">
+                Воспроизвести
+            </button>
+        </a>
+
+        <!-- Добавить в список -->
+        <button onclick="toggleFavorite('{{ movie.uu_id }}', this); event.stopPropagation();"
+                class="bg-green-600 text-xs py-1 rounded">
+            Удалить из списка
+        </button>
+
+    </div>
+</div>
+{% endfor %}
+
+</div>
+</section>
+
+<!-- MODAL -->
+<div class="modal hidden" id="movieModal">
+<div class="modal-content bg-gray-900 p-5 rounded">
+
+    <div class="flex justify-between mb-3">
+        <h2 class="text-xl"></h2>
+        <button onclick="hideModal()">✕</button>
+    </div>
+
+    <img class="mb-3 rounded">
+
+    <p class="mb-3"></p>
+
+    <div class="flex gap-3">
+
+        <!-- Воспроизвести -->
+        <a id="modalPlayLink">
+            <button class="bg-red-600 p-2 rounded">
+                Воспроизвести
+            </button>
+        </a>
+
+        <!-- Добавить в список -->
+        <button id="addToListButton"
+                onclick="toggleFavorite(currentMovieUUID, this)"
+                class="border border-white p-2 rounded">
+            Добавить в список
+        </button>
+
+    </div>
+</div>
+</div>
+
+<script>
+let currentMovieUUID = null;
+
+function showModal(el) {
+    const modal = document.getElementById('movieModal');
+
+    currentMovieUUID = el.dataset.videoUrl.split('/').pop();
+
+    modal.querySelector('h2').textContent = el.dataset.title;
+    modal.querySelector('img').src = el.dataset.imageCoverUrl;
+    modal.querySelector('p').textContent = el.dataset.description;
+    modal.querySelector('#modalPlayLink').href = el.dataset.videoUrl;
+
+    const btn = document.getElementById('addToListButton');
+    btn.textContent = 'Добавить в список';
+    btn.className = 'border border-white p-2 rounded';
+
+    modal.classList.remove('hidden');
+}
+
+function hideModal() {
+    document.getElementById('movieModal').classList.add('hidden');
+}
+
+/* =========================
+   SINGLE TOGGLE FUNCTION
+   ========================= */
+function toggleFavorite(uuid, btn) {
+    if (!uuid) return;
+
+    const isAdded = btn.textContent.trim() === 'Удалить из списка';
+    const url = isAdded
+        ? "{% url 'remove-from-list' %}"
+        : "{% url 'add-to-list' %}";
+
+    $.ajax({
+        url: url,
+        type: "POST",
+        data: {
+            movie_id: uuid,
+            csrfmiddlewaretoken: "{{ csrf_token }}"
+        },
+        success: function () {
+            const newText = isAdded ? 'Добавить в список' : 'Удалено из списка';
+
+            btn.textContent = newText;
+            btn.className = isAdded
+                ? 'border border-white p-2 rounded'
+                : 'bg-green-600 text-white p-2 rounded';
+
+            /* Sync modal button */
+            const modalBtn = document.getElementById('addToListButton');
+            if (modalBtn && currentMovieUUID === uuid && modalBtn !== btn) {
+                modalBtn.textContent = newText;
+                modalBtn.className = btn.className;
+            }
+        },
+        error: function (xhr, errmsg) {
+            console.error("Ошибка:", errmsg);
+        }
+    });
+}
+</script>
+
+</body>
+</html>

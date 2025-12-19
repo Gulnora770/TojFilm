@@ -1,0 +1,12 @@
+[build]
+  command = "pip install -r requirements.txt && python manage.py collectstatic --noinput"
+  publish = "staticfiles"
+
+[env]
+  DJANGO_SETTINGS_MODULE = "tojfilm_site.settings"
+  PYTHONUNBUFFERED = "1"
+  PYTHONPATH = "."
+  PORT = "8000"
+
+[functions]
+  api/index.py = { runtime = "python3.11" }

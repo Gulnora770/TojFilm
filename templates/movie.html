@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Воспроизведение фильма</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+</head>
+
+<body class="bg-blue-900 text-white" style="background-color: #181818;">
+
+    <!-- Navbar -->
+    <header class="p-5 flex justify-between items-center">
+        <img src="https://raw.githubusercontent.com/Gulnora770/TojFilm/1876c4f4ed04b8ea452b8ecd6b122a35a65a0784/tojFilmLogo.png" height="30" alt="TojFilm Logo" width="110">
+        <nav class="flex space-x-5">
+            <span>Главная</span>
+            <span>Сериалы</span>
+            <span>Фильмы</span>
+            <span>Новое и популярное</span>
+        </nav>
+        <div class="flex space-x-5 items-center">
+            <input type="search" placeholder="Поиск" class="bg-gray-700 p-2 rounded">
+            <button class="bg-red-600 text-white p-2 rounded hover:bg-red-500">Поиск</button>
+            <div class="relative">
+                <a href="#" class="block p-2">Выйти</a>
+            </div>
+        </div>
+    </header>
+
+    <hr>
+    <!-- Main Content -->
+    <div class="container mx-auto mt-10">
+        <!-- Movie Title and Back Button -->
+        <div class="flex items-center justify-between">
+            <h2 class="text-3xl font-semibold">{{movie_details.title}}</h2>
+            <a href="/" class="text-gray-400 hover:text-white">← Назад к фильмам</a>
+        </div>
+
+        <div class="mt-8">
+            <video class="w-full h-auto" controls>
+                <source src="{{movie_details.video.url}}" type="video/mp4">
+                Ваш браузер не поддерживает видео тег.
+            </video>
+        </div>
+
+
+        <!-- Movie Description -->
+        <div class="mt-6">
+            <h3 class="text-xl font-semibold mb-2">О фильме</h3>
+            <p>
+                {{movie_details.description}}
+            </p>
+        </div>
+    </div>
+
+</body>
+
+</html>

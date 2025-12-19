@@ -1,0 +1,14 @@
+{
+  "builds": [
+    {
+      "src": "tojfilm_site/wsgi.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "tojfilm_site/wsgi.py"
+    }
+  ]
+}
