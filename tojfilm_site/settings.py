@@ -138,3 +138,9 @@ CSRF_TRUSTED_ORIGINS = ['https://django-netflix-clone-dev-tmkz.4.us-1.fl0.io']
 CSRF_COOKIE_SECURE = False
 SESSION_COOKIE_SECURE = False
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
+ALLOWED_HOSTS = [
+    'localhost',
+    '127.0.0.1',
+    '.onrender.com'
+]
+
