@@ -19,13 +19,11 @@
    ```
 4. **Выполните миграции базы данных:**
    ```
-   python manage.py migrate
+   python main.py migrate
    ```
 5. **Запустите сервер:**
    ```
-   python manage.py runserver
-   ```
-6. **Откройте сайт:**
+   python main.py runserver
    Перейдите в браузере по адресу http://127.0.0.1:8000/
 
 ## Примечания
