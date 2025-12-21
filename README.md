@@ -1,4 +1,4 @@
-# Netflix Клон на Django
+# TojFilm на Django
 
 ## Быстрый старт
 
